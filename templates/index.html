@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disease Prediction</title>
+</head>
+<style>
+    body {
+        background: linear-gradient(135deg, #74ebd5, #acb6e5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .container {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        width: 420px;
+        border: 3px solid #2980b9;
+    }
+
+    h2 {
+        font-size: 32px;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 15px;
+        text-align: center;
+    }
+
+    input {
+        width: 100%;
+        padding: 12px;
+        margin-top: 10px;
+        border: 2px solid #ccc;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: 0.3s;
+    }
+
+    input:focus {
+        border-color: #2980b9;
+        outline: none;
+        box-shadow: 0px 0px 8px rgba(41, 128, 185, 0.6);
+    }
+
+    button {
+        width: 100%;
+        padding: 12px;
+        margin-top: 15px;
+        background: #2980b9;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 18px;
+        transition: 0.3s;
+        font-weight: bold;
+    }
+
+    button:hover {
+        background: #1f6690;
+        transform: scale(1.05);
+    }
+
+    .result {
+        margin-top: 20px;
+        background: #ecf0f1;
+        padding: 15px;
+        border-radius: 10px;
+        text-align: left;
+        border: 2px solid #2980b9;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .result p {
+        font-size: 16px;
+        margin: 5px 0;
+    }
+
+    .result strong {
+        color: #2980b9;
+    }
+
+
+</style>
+
+<body class="bg-gradient-to-r from-blue-200 to-blue-500 flex items-center justify-center h-screen p-4">
+    <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md text-center">
+        <h2 class="text-3xl font-extrabold text-gray-800 mb-6">MediPredict</h2>
+        <input id="symptoms" type="text" list="symptomList" placeholder="Enter symptoms (e.g., fever, cough)"
+            class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+        <datalist id="symptomList">
+            <option value="Joint Pain, Swelling, Stiffness"></option>
+            <option value="Fatigue, Pale Skin, Dizziness"></option>
+            <option value="High Fever, Severe Headache"></option>
+            <option value="Excessive Thirst, Frequent Urination"></option>
+            <option value="Headache, Nausea, Blurred Vision"></option>
+            <option value="Shortness of Breath, Chest Pain"></option>
+            <option value="Skin Rash, Itching, Redness"></option>
+            <option value="Fever, Cough, Sore Throat"></option>
+            <option value="Abdominal Pain, Bloating"></option>
+            <option value="Stomach Pain, Vomiting, Diarrhea"></option>
+        </datalist>
+
+        <button onclick="predictDisease()"
+            class="w-full mt-4 bg-blue-600 text-white py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-all">Predict</button>
+        <div id="result" class="mt-6 p-4 bg-gray-100 rounded-lg text-gray-800 hidden text-left">
+            <h3 class="text-xl font-bold mb-2">Prediction Result :</h3>
+            <p><strong class="text-blue-600">Disease:</strong> <span id="disease"></span></p>
+            <p><strong class="text-blue-600">Causes:</strong> <span id="causes"></span></p>
+            <p><strong class="text-blue-600">Precautions:</strong> <span id="precautions"></span></p>
+            <p><strong class="text-blue-600">Recommended Medicines:</strong> <span id="medicines"></span></p>
+        </div>
+    </div>
+    <script>
+        async function predictDisease() {
+            let symptoms = document.getElementById("symptoms").value;
+
+            if (!symptoms) {
+                alert("Please enter symptoms!");
+                return;
+            }
+
+            try {
+                let response = await fetch("http://127.0.0.1:5000/predict", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ symptoms: symptoms })
+                });
+
+                let data = await response.json();
+
+                if (data.error) {
+                    document.getElementById("disease").innerText = "Error: " + data.error;
+                } else {
+                    document.getElementById("disease").innerText = data.predicted_disease;
+                    document.getElementById("causes").innerText = data.causes;
+                    document.getElementById("precautions").innerText = data.precautions;
+                    document.getElementById("medicines").innerText = data.medicines;
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                document.getElementById("disease").innerText = "Failed to fetch prediction.";
+            }
+        }
+    </script>
+</body>
+
+</html>
